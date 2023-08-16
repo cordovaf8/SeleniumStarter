@@ -16,6 +16,10 @@ namespace SeleniumStarter.Pages
         public IWebDriver Driver { get; set; }
 
         public HomePage HomePage { get; set; }
+        public FormsPage FormsPage { get; set; }
+
+        public PracticeFormPage PracticeFormPage { get; set; }
+
         public Shared Shared { get; set; }
 
         public Pages(IWebDriver driver, Interaction interaction)
@@ -25,7 +29,8 @@ namespace SeleniumStarter.Pages
 
             #region DemoQA Pages
             HomePage = new(driver, interaction);
-
+            FormsPage = new(driver, interaction);
+            PracticeFormPage = new(driver, interaction);
             Shared = new(driver, interaction);
  
 
