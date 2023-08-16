@@ -1,36 +1,43 @@
-# This is a basic workflow to help you get started with Actions
+name: Selenium Tests
 
-name: CI
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "master" branch
   push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+    branches:
+      - main  # Adjust the branch name as needed
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+  test:
+    name: Run Selenium Tests
+    runs-on: windows-latest  # Use the Windows environment for C# development
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '6.0.x'  # Specify the .NET version you need
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: Restore Dependencies
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          dotnet restore SeleniumStarter  # Adjust the path to your test project
+
+      - name: Build Project
+        run: |
+          dotnet build SeleniumStarter  # Adjust the path to your test project
+
+      - name: Run Selenium Tests
+        run: |
+          dotnet test SeleniumStarter --logger:nunit;LogFilePath=test-results.xml  # Adjust the path to your test project
+
+      - name: Generate HTML Report
+        run: |
+          dotnet tool install --global nunit3-console-report-generator
+          nunit3-console-report-generator test-results.xml --out=report --format=Html
+          
+      - name: Upload Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-report
+          path: report
