@@ -1,0 +1,43 @@
+name: Selenium Tests
+
+on:
+  push:
+    branches:
+      - main  # Adjust the branch name as needed
+
+jobs:
+  test:
+    name: Run Selenium Tests
+    runs-on: windows-latest  # Use the Windows environment for C# development
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '6.0.x'  # Specify the .NET version you need
+
+      - name: Restore Dependencies
+        run: |
+          dotnet restore SeleniumStarter  # Adjust the path to your test project
+
+      - name: Build Project
+        run: |
+          dotnet build SeleniumStarter  # Adjust the path to your test project
+
+      - name: Run Selenium Tests
+        run: |
+          dotnet test SeleniumStarter --logger:nunit;LogFilePath=test-results.xml  # Adjust the path to your test project
+
+      - name: Generate HTML Report
+        run: |
+          dotnet tool install --global nunit3-console-report-generator
+          nunit3-console-report-generator test-results.xml --out=report --format=Html
+          
+      - name: Upload Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-report
+          path: report
